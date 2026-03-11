@@ -56,9 +56,10 @@
                 </div>
             </div>
 
-            <div id="permission-box" class="mt-8 p-4 bg-emerald-50 rounded-2xl border border-emerald-200 text-center shadow-inner">
-                <p class="text-emerald-800 text-sm mb-3">แอปต้องใช้ไมโครโฟนเพื่อวัดแรงลม</p>
-                <button id="mic-btn" class="px-8 py-2 bg-emerald-500 text-white font-bold rounded-full hover:bg-emerald-600 transition-colors shadow-md">🎤 อนุญาตการใช้ไมค์</button>
+            <div id="permission-box" class="mt-8 p-5 bg-white/60 backdrop-blur rounded-2xl border-2 border-dashed border-emerald-400 text-center">
+                <p id="mic-status-text" class="text-emerald-900 font-medium mb-3">⚠️ เพื่อเริ่มปลูกปอด โปรดอนุญาตใช้ไมโครโฟน</p>
+                <button id="mic-btn" class="px-10 py-3 bg-emerald-500 text-white font-black rounded-full hover:bg-emerald-600 transition-all shadow-lg active:scale-95">🎤 กดตรงนี้เพื่อเปิดไมค์</button>
+                <p class="text-[10px] text-emerald-700 mt-3">*หากเปิดผ่าน Line/Facebook ให้กด "เปิดในเบราว์เซอร์" (Chrome/Safari)*</p>
             </div>
         </div>
 
@@ -113,15 +114,43 @@
         const micBtn = document.getElementById('mic-btn');
         const actionBtn = document.getElementById('action-btn');
 
-        micBtn.onclick = async () => {
+        // ฟังก์ชันขอใช้ไมค์ที่เสถียรขึ้น
+        async function requestMicrophone() {
             try {
+                // เช็คว่าเบราว์เซอร์รองรับไหม
+                if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+                    throw new Error("เบราว์เซอร์นี้ไม่รองรับการใช้ไมค์");
+                }
+                
                 window.micStream = await navigator.mediaDevices.getUserMedia({ audio: true });
-                document.getElementById('permission-box').innerHTML = "<span class='text-emerald-600 font-bold text-lg'>✅ ไมโครโฟนพร้อมใช้งาน!</span>";
-            } catch (err) { alert("กรุณาอนุญาตเข้าถึงไมค์ครับ"); }
-        };
+                document.getElementById('permission-box').classList.add('bg-emerald-100');
+                document.getElementById('permission-box').style.borderColor = "#10b981";
+                document.getElementById('mic-status-text').innerHTML = "✅ <span class='text-emerald-700'>ไมโครโฟนพร้อมปลูกปอดแล้ว!</span>";
+                micBtn.style.display = "none";
+                return true;
+            } catch (err) {
+                console.error("Mic Error:", err);
+                let errorMsg = "❌ ไม่สามารถเข้าถึงไมค์ได้";
+                if (err.name === 'NotAllowedError') {
+                    errorMsg = "❌ คุณปฏิเสธการใช้ไมค์! กรุณากดรูปแม่กุญแจที่แถบที่อยู่เว็บเพื่อ 'อนุญาต' (Allow)";
+                } else if (err.name === 'NotFoundError') {
+                    errorMsg = "❌ ไม่พบไมโครโฟนในเครื่องนี้";
+                }
+                alert(errorMsg);
+                document.getElementById('mic-status-text').innerHTML = `<span class='text-red-600'>${errorMsg}</span>`;
+                return false;
+            }
+        }
 
-        function initMode(mode) {
-            if (!window.micStream) return alert("กรุณากด 'อนุญาตการใช้ไมค์' ก่อนครับ!");
+        micBtn.onclick = requestMicrophone;
+
+        async function initMode(mode) {
+            // ถ้ายังไม่มีสิทธิ์ ให้ลองขออีกรอบอัตโนมัติ
+            if (!window.micStream) {
+                const granted = await requestMicrophone();
+                if (!granted) return;
+            }
+            
             currentMode = mode;
             document.getElementById('menu-screen').classList.add('hidden');
             document.getElementById('test-screen').classList.remove('hidden');
@@ -145,7 +174,15 @@
         function startTest() {
             isListening = true; hasStarted = false;
             maxPower = 0; totalPower = 0; samples = 0; duration = 0;
+            
+            // สร้าง AudioContext ใหม่ทุกครั้งเพื่อป้องกันปัญหาในบางเบราว์เซอร์
             audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            
+            // ต้องเรียก resume() สำหรับ iOS/Chrome บางเวอร์ชัน
+            if (audioContext.state === 'suspended') {
+                audioContext.resume();
+            }
+
             analyser = audioContext.createAnalyser();
             microphone = audioContext.createMediaStreamSource(window.micStream);
             microphone.connect(analyser);
@@ -212,37 +249,35 @@
                 val.textContent = score; unit.textContent = "พลังลม (%)";
                 if (score >= 80) { 
                     grade.textContent = "A+"; 
-                    desc.innerHTML = "🏆 ปอดเหล็กไฟ!<br><span class='font-normal text-sm'>พลังระเบิดมหาศาล เหมือนคนไม่เคยแตะบุหรี่ หลอดลมสะอาดมาก</span>"; 
-                    desc.className = "p-6 rounded-2xl bg-green-100 text-green-700 border-green-300"; 
+                    desc.innerHTML = "🏆 ปอดเหล็กไฟ!<br><span class='font-normal text-sm text-gray-600'>พลังระเบิดมหาศาล เหมือนคนไม่เคยแตะบุหรี่</span>"; 
+                    desc.className = "p-6 rounded-2xl bg-green-50 text-green-700 border-green-200"; 
                 } else if (score >= 45) { 
                     grade.textContent = "B"; 
-                    desc.innerHTML = "✅ ปอดปกติ<br><span class='font-normal text-sm'>อยู่ในเกณฑ์คนสุขภาพดีทั่วไป ออกกำลังกายเพิ่มจะฟิตกว่านี้</span>"; 
-                    desc.className = "p-6 rounded-2xl bg-blue-100 text-blue-700 border-blue-300"; 
+                    desc.innerHTML = "✅ ปอดปกติ<br><span class='font-normal text-sm text-gray-600'>อยู่ในเกณฑ์คนสุขภาพดีทั่วไป</span>"; 
+                    desc.className = "p-6 rounded-2xl bg-blue-50 text-blue-700 border-blue-200"; 
                 } else { 
                     grade.textContent = "C"; 
-                    desc.innerHTML = "🚬 ปอดสำลักควัน<br><span class='font-normal text-sm'>แรงเป่าแผ่ว มักพบในคนสูบบุหรี่หรือคนที่มีภาวะหลอดลมตีบ</span>"; 
-                    desc.className = "p-6 rounded-2xl bg-orange-100 text-orange-700 border-orange-300"; 
+                    desc.innerHTML = "🚬 ปอดสำลักควัน<br><span class='font-normal text-sm text-gray-600'>แรงเป่าแผ่ว พบได้บ่อยในคนสูบบุหรี่หรือคนที่มีภาวะหลอดลมตีบ</span>"; 
+                    desc.className = "p-6 rounded-2xl bg-orange-50 text-orange-700 border-orange-200"; 
                 }
             } else {
                 const score = duration.toFixed(1);
                 val.textContent = score; unit.textContent = "วินาที";
                 if (score >= 18) { 
                     grade.textContent = "S"; 
-                    desc.innerHTML = "🧘‍♂️ เทพแห่งความอึด!<br><span class='font-normal text-sm'>ความจุอากาศในปอดดีเยี่ยม ลมหายใจยาวและแข็งแรงมาก</span>"; 
-                    desc.className = "p-6 rounded-2xl bg-green-100 text-green-700 border-green-300"; 
+                    desc.innerHTML = "🧘‍♂️ เทพแห่งความอึด!<br><span class='font-normal text-sm text-gray-600'>ความจุอากาศในปอดดีเยี่ยมมาก ลมหายใจยาวเหยียด</span>"; 
+                    desc.className = "p-6 rounded-2xl bg-green-50 text-green-700 border-green-200"; 
                 } else if (score >= 10) { 
                     grade.textContent = "A"; 
-                    desc.innerHTML = "✅ ความอึดปกติ<br><span class='font-normal text-sm'>สุขภาพปอดแข็งแรงดี ทำกิจกรรมต่างๆ ได้คล่องตัว</span>"; 
-                    desc.className = "p-6 rounded-2xl bg-blue-100 text-blue-700 border-blue-300"; 
+                    desc.innerHTML = "✅ ความอึดปกติ<br><span class='font-normal text-sm text-gray-600'>สุขภาพปอดแข็งแรงดี</span>"; 
+                    desc.className = "p-6 rounded-2xl bg-blue-50 text-blue-700 border-blue-200"; 
                 } else { 
                     grade.textContent = "F"; 
-                    desc.innerHTML = "⚠️ ปอดแผ่วปลาย<br><span class='font-normal text-sm'>กลั้นลมได้น้อย เสี่ยงต่อภาวะถุงลมล้า ซึ่งอาจมาจากบุหรี่</span>"; 
-                    desc.className = "p-6 rounded-2xl bg-red-100 text-red-700 border-red-300"; 
+                    desc.innerHTML = "⚠️ ปอดแผ่วปลาย<br><span class='font-normal text-sm text-gray-600'>กลั้นลมได้น้อย เสี่ยงต่อภาวะถุงลมล้า ซึ่งผลมาจากบุหรี่</span>"; 
+                    desc.className = "p-6 rounded-2xl bg-red-50 text-red-700 border-red-200"; 
                 }
             }
         }
     </script>
 </body>
 </html>
-</html>
-
