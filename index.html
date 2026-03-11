@@ -24,6 +24,8 @@
         .mode-card { transition: all 0.3s ease; cursor: pointer; }
         .mode-card:hover { transform: translateY(-8px); filter: brightness(1.05); }
         .beta-badge { font-size: 0.4em; vertical-align: middle; background: #fbbf24; color: #78350f; padding: 2px 10px; border-radius: 12px; margin-left: 8px; }
+        .animate-fade-in { animation: fadeIn 0.5s ease-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
     </style>
 </head>
 <body class="h-full bg-gradient-to-b from-sky-300 via-sky-200 to-emerald-200 p-4 overflow-auto">
@@ -42,7 +44,7 @@
                 <div class="text-5xl">🔥</div>
                 <div>
                     <h2 class="text-2xl font-bold text-orange-600">โหมดระเบิดพลัง</h2>
-                    <p class="text-gray-600 text-sm">วัดความแรงลมเป่า (เน้นพ่นลมแรงครั้งเดียว)</p>
+                    <p class="text-gray-600 text-sm">วัดความแรงลมเป่าสูงสุด (เน้นพ่นลมแรงครั้งเดียว)</p>
                 </div>
             </div>
 
@@ -50,17 +52,17 @@
                 <div class="text-5xl">⏳</div>
                 <div>
                     <h2 class="text-2xl font-bold text-blue-600">โหมดอึดทะลุโลก</h2>
-                    <p class="text-gray-600 text-sm">วัดความนาน (เน้นเป่าลากเสียงลมให้นานที่สุด)</p>
+                    <p class="text-gray-600 text-sm">วัดความนาน (เน้นเป่าประคองลมให้นานที่สุด)</p>
                 </div>
             </div>
 
             <div id="permission-box" class="mt-8 p-4 bg-emerald-50 rounded-2xl border border-emerald-200 text-center">
-                <p class="text-emerald-800 text-sm mb-3">กรุณาอนุญาตใช้ไมค์ก่อนเริ่มทดสอบ</p>
-                <button id="mic-btn" class="px-6 py-2 bg-emerald-500 text-white font-bold rounded-full hover:bg-emerald-600 transition-colors">🎤 อนุญาตการใช้ไมค์</button>
+                <p class="text-emerald-800 text-sm mb-3">แอปต้องใช้ไมโครโฟนเพื่อวัดแรงลม</p>
+                <button id="mic-btn" class="px-8 py-2 bg-emerald-500 text-white font-bold rounded-full hover:bg-emerald-600 transition-colors">🎤 อนุญาตการใช้ไมค์</button>
             </div>
         </div>
 
-        <div id="test-screen" class="hidden">
+        <div id="test-screen" class="hidden animate-fade-in">
             <button onclick="location.reload()" class="mb-4 text-emerald-700 font-bold flex items-center gap-2"> ⬅️ กลับหน้าเมนู </button>
             
             <div class="bg-white/50 backdrop-blur rounded-3xl p-6 mb-6 shadow-xl relative text-center">
@@ -74,30 +76,30 @@
                     <div class="ground"></div>
                 </div>
                 <div class="mt-4">
-                    <div id="status-message" class="text-emerald-800 text-center text-xl font-bold mb-3 h-8">เตรียมเป่า...</div>
-                    <div class="w-full h-4 bg-gray-200 rounded-full overflow-hidden border border-white">
-                        <div id="breath-fill" class="h-full bg-gradient-to-r from-yellow-400 to-red-500 transition-all duration-100" style="width: 0%;"></div>
+                    <div id="status-message" class="text-emerald-800 text-center text-xl font-bold mb-3 h-8 italic">เตรียมเป่า...</div>
+                    <div class="w-full h-5 bg-gray-200 rounded-full overflow-hidden border-2 border-white">
+                        <div id="breath-fill" class="h-full bg-gradient-to-r from-yellow-400 via-orange-500 to-red-600 transition-all duration-75" style="width: 0%;"></div>
                     </div>
                 </div>
             </div>
-            <button id="action-btn" class="w-full py-5 bg-emerald-500 text-white text-2xl font-black rounded-2xl shadow-lg active:scale-95 transition-all">เริ่มทดสอบ!</button>
+            <button id="action-btn" class="w-full py-5 text-white text-2xl font-black rounded-2xl shadow-lg active:scale-95 transition-all">เริ่มทดสอบ!</button>
         </div>
 
-        <div id="result-screen" class="hidden">
+        <div id="result-screen" class="hidden animate-fade-in">
             <div class="bg-white/95 rounded-3xl p-8 shadow-2xl border-4 border-emerald-400 text-center">
                 <h3 class="text-2xl font-bold text-emerald-800 mb-6">สรุปผลการ "ปลูกปอด"</h3>
                 <div class="flex justify-center gap-4 mb-8">
-                    <div class="bg-orange-50 p-4 rounded-2xl w-1/2">
+                    <div class="bg-orange-50 p-4 rounded-2xl w-1/2 shadow-inner">
                         <div id="final-value" class="text-4xl font-black text-orange-600">0</div>
-                        <div id="final-unit" class="text-xs font-bold text-orange-800 uppercase">หน่วย</div>
+                        <div id="final-unit" class="text-xs font-bold text-orange-800 uppercase tracking-widest">หน่วย</div>
                     </div>
-                    <div class="bg-emerald-50 p-4 rounded-2xl w-1/2">
+                    <div class="bg-emerald-50 p-4 rounded-2xl w-1/2 shadow-inner">
                         <div id="final-grade" class="text-5xl font-black text-emerald-600">-</div>
-                        <div class="text-xs font-bold text-emerald-800">เกรดปอด</div>
+                        <div class="text-xs font-bold text-emerald-800 uppercase tracking-widest">เกรดปอด</div>
                     </div>
                 </div>
-                <div id="result-desc" class="p-5 rounded-2xl font-bold mb-8"></div>
-                <button onclick="location.reload()" class="w-full py-4 bg-emerald-600 text-white font-bold rounded-2xl text-xl"> 🔄 ทดสอบใหม่ </button>
+                <div id="result-desc" class="p-6 rounded-2xl font-bold mb-8 text-lg border-2"></div>
+                <button onclick="location.reload()" class="w-full py-4 bg-emerald-600 text-white font-bold rounded-2xl text-xl shadow-lg active:scale-95 transition-all"> 🔄 ทดสอบใหม่อีกครั้ง </button>
             </div>
         </div>
     </div>
@@ -114,12 +116,12 @@
         micBtn.onclick = async () => {
             try {
                 window.micStream = await navigator.mediaDevices.getUserMedia({ audio: true });
-                document.getElementById('permission-box').innerHTML = "✅ ไมโครโฟนพร้อมใช้!";
-            } catch (err) { alert("กรุณาเปิดไมค์ด้วยครับ"); }
+                document.getElementById('permission-box').innerHTML = "<span class='text-emerald-600 font-bold text-lg'>✅ ไมโครโฟนพร้อมใช้งานแล้ว!</span>";
+            } catch (err) { alert("กรุณาเปิดไมค์เพื่อใช้งานโหมดทดสอบครับ"); }
         };
 
         function initMode(mode) {
-            if (!window.micStream) return alert("กรุณากดอนุญาตการใช้ไมค์ก่อนครับ!");
+            if (!window.micStream) return alert("กรุณากดปุ่ม 'อนุญาตการใช้ไมค์' ด้านล่างก่อนเริ่มครับ!");
             currentMode = mode;
             document.getElementById('menu-screen').classList.add('hidden');
             document.getElementById('test-screen').classList.remove('hidden');
@@ -132,4 +134,115 @@
             const overlay = document.getElementById('countdown-overlay');
             overlay.style.display = 'flex';
             let c = 3; overlay.textContent = c;
-            let t = setInterval
+            let t = setInterval(() => {
+                c--;
+                if (c > 0) overlay.textContent = c;
+                else if (c === 0) overlay.textContent = "เป่า!!!";
+                else { clearInterval(t); overlay.style.display = 'none'; startTest(); }
+            }, 1000);
+        };
+
+        function startTest() {
+            isListening = true; hasStarted = false;
+            maxPower = 0; totalPower = 0; samples = 0; duration = 0;
+            audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            analyser = audioContext.createAnalyser();
+            microphone = audioContext.createMediaStreamSource(window.micStream);
+            microphone.connect(analyser);
+            update();
+        }
+
+        function update() {
+            if (!isListening) return;
+            const data = new Uint8Array(analyser.frequencyBinCount);
+            analyser.getByteFrequencyData(data);
+            const vol = (data.reduce((a, b) => a + b) / data.length) / 100;
+            const normVol = Math.min(vol, 1);
+            document.getElementById('breath-fill').style.width = (normVol * 100) + "%";
+
+            // เกณฑ์การเริ่ม: โหมดพลังใช้ 0.15 (แรง), โหมดอึดใช้ 0.05 (แค่เสียงพ่น)
+            const threshold = currentMode === 'power' ? 0.15 : 0.05;
+
+            if (normVol > threshold) {
+                if (!hasStarted) {
+                    hasStarted = true;
+                    startTime = Date.now();
+                }
+                clearTimeout(silenceTimer); silenceTimer = null;
+
+                if (currentMode === 'power') {
+                    if (normVol > maxPower) maxPower = normVol;
+                    totalPower += normVol; samples++;
+                    document.getElementById('status-message').textContent = "🔥 ระเบิดพลัง!!";
+                    growTree(normVol * 6.5);
+                } else {
+                    duration = (Date.now() - startTime) / 1000;
+                    document.getElementById('status-message').textContent = `⏳ เวลาเป่า: ${duration.toFixed(1)} วิ`;
+                    growTree(0.7);
+                }
+            } else if (hasStarted) {
+                // ถ้าลมหยุด โหมดพลังจบไวกว่า (0.6 วิ) โหมดอึดให้เวลาหายใจ (1.0 วิ)
+                if (!silenceTimer) silenceTimer = setTimeout(finish, currentMode === 'power' ? 600 : 1000);
+            }
+            animationId = requestAnimationFrame(update);
+        }
+
+        function growTree(amt) {
+            const trunk = document.getElementById('trunk');
+            const foliage = document.getElementById('foliage');
+            let currH = parseFloat(trunk.style.height) - 30;
+            let nextH = Math.min(currH + amt, 100);
+            let h = 30 + (nextH * 1.5);
+            trunk.style.height = h + "px";
+            if (nextH > 5) foliage.style.opacity = 1;
+            foliage.style.bottom = (45 + h - 30) + "px";
+            foliage.style.transform = `scale(${0.5 + (nextH / 100)})`;
+        }
+
+        function finish() {
+            isListening = false; cancelAnimationFrame(animationId);
+            document.getElementById('test-screen').classList.add('hidden');
+            document.getElementById('result-screen').classList.remove('hidden');
+            
+            const val = document.getElementById('final-value');
+            const unit = document.getElementById('final-unit');
+            const grade = document.getElementById('final-grade');
+            const desc = document.getElementById('result-desc');
+
+            if (currentMode === 'power') {
+                const score = Math.round(((maxPower * 0.7) + ((totalPower/samples) * 0.3)) * 100);
+                val.textContent = score; unit.textContent = "พลังลม (%)";
+                if (score >= 80) { 
+                    grade.textContent = "A+"; 
+                    desc.innerHTML = "🏆 ปอดเหล็กไฟ!<br><span class='font-normal text-sm'>พลังระเบิดมหาศาล เหมือนคนไม่เคยแตะบุหรี่ หลอดลมกว้างมาก</span>"; 
+                    desc.className = "p-6 rounded-2xl bg-green-100 text-green-700 border-green-300"; 
+                } else if (score >= 45) { 
+                    grade.textContent = "B"; 
+                    desc.innerHTML = "✅ ปอดปกติ<br><span class='font-normal text-sm'>อยู่ในเกณฑ์คนสุขภาพดีทั่วไป ออกกำลังกายเพิ่มจะฟิตกว่านี้</span>"; 
+                    desc.className = "p-6 rounded-2xl bg-blue-100 text-blue-700 border-blue-300"; 
+                } else { 
+                    grade.textContent = "C"; 
+                    desc.innerHTML = "🚬 ปอดสำลักควัน<br><span class='font-normal text-sm'>แรงเป่าแผ่ว มักพบในคนสูบบุหรี่หรือคนที่มีภาวะหลอดลมตีบ</span>"; 
+                    desc.className = "p-6 rounded-2xl bg-orange-100 text-orange-700 border-orange-300"; 
+                }
+            } else {
+                const score = duration.toFixed(1);
+                val.textContent = score; unit.textContent = "วินาที";
+                if (score >= 18) { 
+                    grade.textContent = "S"; 
+                    desc.innerHTML = "🧘‍♂️ เทพแห่งความอึด!<br><span class='font-normal text-sm'>ความจุอากาศในปอดดีเยี่ยมมาก ลมหายใจยาวเหยียดและแข็งแรง</span>"; 
+                    desc.className = "p-6 rounded-2xl bg-green-100 text-green-700 border-green-300"; 
+                } else if (score >= 10) { 
+                    grade.textContent = "A"; 
+                    desc.innerHTML = "✅ ความอึดปกติ<br><span class='font-normal text-sm'>สุขภาพปอดแข็งแรงดี อยู่ในระดับที่ทำกิจกรรมต่างๆ ได้คล่องตัว</span>"; 
+                    desc.className = "p-6 rounded-2xl bg-blue-100 text-blue-700 border-blue-300"; 
+                } else { 
+                    grade.textContent = "F"; 
+                    desc.innerHTML = "⚠️ ปอดแผ่วปลาย<br><span class='font-normal text-sm'>กลั้นลมได้น้อย เสี่ยงต่อภาวะถุงลมล้า ซึ่งผลมาจากบุหรี่หรือการไม่เคลื่อนไหว</span>"; 
+                    desc.className = "p-6 rounded-2xl bg-red-100 text-red-700 border-red-300"; 
+                }
+            }
+        }
+    </script>
+</body>
+</html>
