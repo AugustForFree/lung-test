@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Lung Lab - ศูนย์ทดสอบปอด</title>
+    <title>ปลูกปอด (beta) - วัดสมรรถภาพปอดของคุณ</title>
     <script src="https://cdn.tailwindcss.com/3.4.17"></script>
     <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
@@ -23,6 +23,7 @@
         }
         .mode-card { transition: all 0.3s ease; cursor: pointer; }
         .mode-card:hover { transform: translateY(-8px); filter: brightness(1.05); }
+        .beta-badge { font-size: 0.4em; vertical-align: middle; background: #fbbf24; color: #78350f; padding: 2px 10px; border-radius: 12px; margin-left: 8px; }
     </style>
 </head>
 <body class="h-full bg-gradient-to-b from-sky-300 via-sky-200 to-emerald-200 p-4 overflow-auto">
@@ -33,15 +34,15 @@
         
         <div id="menu-screen" class="space-y-6 animate-fade-in">
             <div class="text-center mb-10">
-                <h1 class="text-5xl font-black text-emerald-800 mb-2">🌱 LUNG LAB</h1>
-                <p class="text-emerald-700 text-lg font-medium">ศูนย์ทดสอบสมรรถภาพปอดฉบับพกพา</p>
+                <h1 class="text-5xl font-black text-emerald-800 mb-2">ปลูกปอด <span class="beta-badge">beta</span></h1>
+                <p class="text-emerald-700 text-lg font-medium">เป่าให้แรง แข็งแรงให้จริง</p>
             </div>
 
             <div onclick="initMode('power')" class="mode-card bg-white/90 p-6 rounded-3xl shadow-xl border-l-8 border-orange-500 flex items-center gap-6">
                 <div class="text-5xl">🔥</div>
                 <div>
                     <h2 class="text-2xl font-bold text-orange-600">โหมดระเบิดพลัง</h2>
-                    <p class="text-gray-600 text-sm">วัดความแรงลมสูงสุด (เน้นพ่นลมแรงครั้งเดียว)</p>
+                    <p class="text-gray-600 text-sm">วัดความแรงลมเป่า (เน้นพ่นลมแรงครั้งเดียว)</p>
                 </div>
             </div>
 
@@ -49,7 +50,7 @@
                 <div class="text-5xl">⏳</div>
                 <div>
                     <h2 class="text-2xl font-bold text-blue-600">โหมดอึดทะลุโลก</h2>
-                    <p class="text-gray-600 text-sm">วัดความนาน (เป่าเลี้ยงเสียงลมให้ได้นานที่สุด)</p>
+                    <p class="text-gray-600 text-sm">วัดความนาน (เน้นเป่าลากเสียงลมให้นานที่สุด)</p>
                 </div>
             </div>
 
@@ -62,7 +63,7 @@
         <div id="test-screen" class="hidden">
             <button onclick="location.reload()" class="mb-4 text-emerald-700 font-bold flex items-center gap-2"> ⬅️ กลับหน้าเมนู </button>
             
-            <div class="bg-white/50 backdrop-blur rounded-3xl p-6 mb-6 shadow-xl relative">
+            <div class="bg-white/50 backdrop-blur rounded-3xl p-6 mb-6 shadow-xl relative text-center">
                 <div class="tree-container">
                     <div class="trunk" id="trunk" style="height: 30px;"></div>
                     <div class="foliage" id="foliage" style="opacity: 0;">
@@ -82,9 +83,9 @@
             <button id="action-btn" class="w-full py-5 bg-emerald-500 text-white text-2xl font-black rounded-2xl shadow-lg active:scale-95 transition-all">เริ่มทดสอบ!</button>
         </div>
 
-        <div id="result-screen" class="hidden animate-bounce-in">
+        <div id="result-screen" class="hidden">
             <div class="bg-white/95 rounded-3xl p-8 shadow-2xl border-4 border-emerald-400 text-center">
-                <h3 id="result-title" class="text-2xl font-bold text-emerald-800 mb-6 underline">ผลลัพธ์ของคุณ</h3>
+                <h3 class="text-2xl font-bold text-emerald-800 mb-6">สรุปผลการ "ปลูกปอด"</h3>
                 <div class="flex justify-center gap-4 mb-8">
                     <div class="bg-orange-50 p-4 rounded-2xl w-1/2">
                         <div id="final-value" class="text-4xl font-black text-orange-600">0</div>
@@ -92,7 +93,7 @@
                     </div>
                     <div class="bg-emerald-50 p-4 rounded-2xl w-1/2">
                         <div id="final-grade" class="text-5xl font-black text-emerald-600">-</div>
-                        <div class="text-xs font-bold text-emerald-800">ระดับปอด</div>
+                        <div class="text-xs font-bold text-emerald-800">เกรดปอด</div>
                     </div>
                 </div>
                 <div id="result-desc" class="p-5 rounded-2xl font-bold mb-8"></div>
@@ -113,7 +114,7 @@
         micBtn.onclick = async () => {
             try {
                 window.micStream = await navigator.mediaDevices.getUserMedia({ audio: true });
-                document.getElementById('permission-box').innerHTML = "✅ ไมโครโฟนพร้อมใช้งาน!";
+                document.getElementById('permission-box').innerHTML = "✅ ไมโครโฟนพร้อมใช้!";
             } catch (err) { alert("กรุณาเปิดไมค์ด้วยครับ"); }
         };
 
@@ -131,94 +132,4 @@
             const overlay = document.getElementById('countdown-overlay');
             overlay.style.display = 'flex';
             let c = 3; overlay.textContent = c;
-            let t = setInterval(() => {
-                c--;
-                if (c > 0) overlay.textContent = c;
-                else if (c === 0) overlay.textContent = "เป่า!!!";
-                else { clearInterval(t); overlay.style.display = 'none'; startTest(); }
-            }, 1000);
-        };
-
-        function startTest() {
-            isListening = true; hasStarted = false;
-            maxPower = 0; totalPower = 0; samples = 0;
-            audioContext = new (window.AudioContext || window.webkitAudioContext)();
-            analyser = audioContext.createAnalyser();
-            microphone = audioContext.createMediaStreamSource(window.micStream);
-            microphone.connect(analyser);
-            update();
-        }
-
-        function update() {
-            if (!isListening) return;
-            const data = new Uint8Array(analyser.frequencyBinCount);
-            analyser.getByteFrequencyData(data);
-            const vol = (data.reduce((a, b) => a + b) / data.length) / 100;
-            const normVol = Math.min(vol, 1);
-            document.getElementById('breath-fill').style.width = (normVol * 100) + "%";
-
-            // เกณฑ์การเริ่ม: โหมดพลังต้องเป่าแรง (0.15) โหมดอึดแค่เสียงลม (0.05)
-            const threshold = currentMode === 'power' ? 0.15 : 0.05;
-
-            if (normVol > threshold) {
-                if (!hasStarted) {
-                    hasStarted = true;
-                    startTime = Date.now();
-                }
-                clearTimeout(silenceTimer); silenceTimer = null;
-
-                if (currentMode === 'power') {
-                    if (normVol > maxPower) maxPower = normVol;
-                    totalPower += normVol; samples++;
-                    document.getElementById('status-message').textContent = "🔥 ระเบิดพลังออกมา!!";
-                    growTree(normVol * 6);
-                } else {
-                    duration = (Date.now() - startTime) / 1000;
-                    document.getElementById('status-message').textContent = `⏳ อึดได้: ${duration.toFixed(1)} วินาที`;
-                    growTree(0.8); // โหมดอึดต้นไม้โตช้าๆ ตามเวลา
-                }
-            } else if (hasStarted) {
-                if (!silenceTimer) silenceTimer = setTimeout(finish, currentMode === 'power' ? 600 : 1000);
-            }
-            animationId = requestAnimationFrame(update);
-        }
-
-        function growTree(amt) {
-            const trunk = document.getElementById('trunk');
-            const foliage = document.getElementById('foliage');
-            let currH = parseFloat(trunk.style.height) - 30;
-            let nextH = Math.min(currH + amt, 100);
-            let h = 30 + (nextH * 1.5);
-            trunk.style.height = h + "px";
-            if (nextH > 5) foliage.style.opacity = 1;
-            foliage.style.bottom = (45 + h - 30) + "px";
-            foliage.style.transform = `scale(${0.5 + (nextH / 100)})`;
-        }
-
-        function finish() {
-            isListening = false; cancelAnimationFrame(animationId);
-            document.getElementById('test-screen').classList.add('hidden');
-            document.getElementById('result-screen').classList.remove('hidden');
-            
-            const val = document.getElementById('final-value');
-            const unit = document.getElementById('final-unit');
-            const grade = document.getElementById('final-grade');
-            const desc = document.getElementById('result-desc');
-
-            if (currentMode === 'power') {
-                const score = Math.round(((maxPower * 0.7) + ((totalPower/samples) * 0.3)) * 100);
-                val.textContent = score; unit.textContent = "พลังลม (%)";
-                if (score >= 80) { grade.textContent = "A+"; desc.innerHTML = "🏆 ปอดเหล็กไฟ!<br>พลังระเบิดมหาศาล หลอดลมกว้างมาก"; desc.className = "p-5 rounded-2xl bg-green-100 text-green-700"; }
-                else if (score >= 45) { grade.textContent = "B"; desc.innerHTML = "✅ ปอดปกติ<br>อยู่ในเกณฑ์คนสุขภาพดีทั่วไป"; desc.className = "p-5 rounded-2xl bg-blue-100 text-blue-700"; }
-                else { grade.textContent = "C"; desc.innerHTML = "🚬 ปอดสำลักควัน<br>แรงเป่าแผ่ว มักพบในคนสูบบุหรี่หรือปอดไม่แข็งแรง"; desc.className = "p-5 rounded-2xl bg-orange-100 text-orange-700"; }
-            } else {
-                const score = duration.toFixed(1);
-                val.textContent = score; unit.textContent = "วินาที";
-                if (score >= 20) { grade.textContent = "S"; desc.innerHTML = "🧘‍♂️ เทพแห่งลมหายใจ!<br>ปอดอึดมาก ความจุอากาศดีเยี่ยม"; desc.className = "p-5 rounded-2xl bg-green-100 text-green-700"; }
-                else if (score >= 12) { grade.textContent = "A"; desc.innerHTML = "✅ ความอึดปกติ<br>สุขภาพปอดแข็งแรงดี"; desc.className = "p-5 rounded-2xl bg-blue-100 text-blue-700"; }
-                else { grade.textContent = "F"; desc.innerHTML = "⚠️ ปอดแผ่วปลาย<br>กลั้นลมได้น้อย เสี่ยงต่อภาวะถุงลมล้าจากการสูบบุหรี่"; desc.className = "p-5 rounded-2xl bg-red-100 text-red-700"; }
-            }
-        }
-    </script>
-</body>
-</html>
+            let t = setInterval
